@@ -9,7 +9,7 @@ class Product:
 
     def __init__(self, window):
         self.wind = window
-        self.wind.title('Product Application')
+        self.wind.title('Listado de Clientes')
 
         #Frame
         frame = LabelFrame(self.wind, text = 'Registrar un nuevo cliente')

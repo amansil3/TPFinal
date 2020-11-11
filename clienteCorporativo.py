@@ -9,4 +9,9 @@ class ClienteCorporativo(Cliente):
         self.nombre_contacto = nombre_contacto
         self.telefono_contacto = telefono_contacto
         super().__init__(telefono, mail, id_cliente)
-         
+
+    def __str__(self):
+        cadena = f"{self.id_cliente}: {self.nombre_empresa} (Cliente Corporativo) \n"
+        cadena+= f"{self.telefono} - {self.mail}\n"
+        cadena+= f"Contacto: {self.nombre_contacto} {self.telefono_contacto}\n"
+        return cadena
