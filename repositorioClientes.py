@@ -31,7 +31,7 @@ class RepositorioClientes(Repositorio):
         '''Recibe un id de cliente (número entero). Retorna un cliente
         Corporativo. Si no lo encuentra, retorna None.'''
         consulta = "SELECT  cc.nombre_empresa, cc.nombre_contacto, \
-                            cc.telefono_contacto c.telefono, c.mail\
+                            cc.telefono_contacto, c.telefono, c.mail\
                     FROM cliente c \
                     JOIN cliente_corporativo cc ON c.id = cc.id_cliente \
                     WHERE c.id = ?"
@@ -44,7 +44,7 @@ class RepositorioClientes(Repositorio):
                                       result[2],
                                       result[3], 
                                       result[4], 
-                                      id_cliente);
+                                      id_cliente)
 
     def get_one_particular(self, id_cliente):
         '''Recibe un id de cliente (número entero). Retorna un cliente
@@ -58,7 +58,7 @@ class RepositorioClientes(Repositorio):
             return None
         else:
             return ClienteParticular(result[0], result[1], result[2], 
-                                      result[3], id_cliente);
+                                      result[3], id_cliente)
         
     
     def get_all(self):
@@ -73,7 +73,7 @@ class RepositorioClientes(Repositorio):
         # Consultamos primero los clientes c orporativos:
         consulta = "SELECT c.id, cp.nombre, cp.apellido, c.telefono, c.mail \
                     FROM cliente_particular cp \
-                    JOIN cliente c ON c.id = cp.id_cliente";
+                    JOIN cliente c ON c.id = cp.id_cliente"
         self.cursor.execute(consulta)
         todos_los_clientes = self.cursor.fetchall()
         for id_cliente, nombre, apellido, telefono, mail in todos_los_clientes:
@@ -87,16 +87,16 @@ class RepositorioClientes(Repositorio):
         ClienteCorporativo'''
         lista_clientes = []
         # Consultamos primero los clientes corporativos:
-        consulta = "SELECT c.id, cc.nombre_empresa, cc.nombre_contacto, \
+        consulta = {"SELECT c.id, cc.nombre_empresa, cc.nombre_contacto, \
                     cc.telefono_contacto, c.telefono, c.mail \
                     FROM cliente_corporativo cc \
-                    JOIN cliente c ON c.id = cc.id_cliente";
+                    JOIN cliente c ON c.id = cc.id_cliente"}
         self.cursor.execute(consulta)
         todos_los_clientes = self.cursor.fetchall()
         for id_cliente, empresa, contacto, telefono_contacto, \
                          telefono_empresa, mail_empresa in todos_los_clientes:
             lista_clientes.append(
-                CienteCorporativo(empresa,
+                ClienteCorporativo(empresa,
                                   contacto,
                                   telefono_contacto,
                                   telefono_empresa,
@@ -123,7 +123,7 @@ class RepositorioClientes(Repositorio):
             if type(cliente).__name__ == "ClienteCorporativo":
                 tabla = "cliente_corporativo"
                 campos = ["id_cliente", "nombre_empresa", "telefono_contacto", \
-                        "id_contacto"]                
+                        "nombre_contacto"]                
 
                 # consulta2 = "INSERT INTO cliente_corporativo (id_cliente,\
                 #              nombre_empresa, telefono_contacto, id_contacto) \
@@ -148,7 +148,9 @@ class RepositorioClientes(Repositorio):
             consulta2 = "INSERT INTO " + tabla + '(' + ','.join(campos)
             consulta2+= ") VALUES (" + signos + ")"  
             # Ejecutamos consulta2, con los parámetros creados en el if anterior
-            result2=self.cursor.execute(consulta2, parametros)
+            # Se eliminó la variable result2, ya que no se iba a utilizar 
+            # (se dejó solo el instanciado)
+            self.cursor.execute(consulta2, parametros)
             # Confirmamos los cambios:
             self.bd.commit()
             # Y retornamos el id del cliente recién insertado:

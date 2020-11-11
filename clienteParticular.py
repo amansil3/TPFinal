@@ -9,6 +9,8 @@ class ClienteParticular(Cliente):
         super().__init__(telefono, mail, id_cliente)
     
     def __str__(self):
+        '''No objeto a string'''
         cadena = f"{self.id_cliente}: {self.nombre} {self.apellido} (Cliente Particular) \n"
         cadena+= f"{self.telefono} - {self.mail}\n"
         return cadena
+    

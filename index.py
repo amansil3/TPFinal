@@ -1,5 +1,6 @@
 from tkinter import ttk
 from tkinter import *
+from repositorioClientes import RepositorioClientes
 
 import sqlite3
 
@@ -28,13 +29,24 @@ class Product:
         self.surname = Entry(frame)
         self.surname.grid(row = 2, column = 1)
 
-        # Button Guardar
-        ttk.Button(frame, text = "Guardar Cliente", command = self.add_clients).grid(row = 3, columnspan = 2, sticky = W + E)
+        # Input Telefono
+        Label(frame, text = 'Telefono: ').grid(row = 3, column = 0)
+        Entry(frame)
+        self.surname = Entry(frame)
+        self.surname.grid(row = 3, column = 1)
 
+        # Input Telefono
+        Label(frame, text = 'Mail: ').grid(row = 4, column = 0)
+        Entry(frame)
+        self.surname = Entry(frame)
+        self.surname.grid(row = 4, column = 1)
+
+        # Button Guardar
+        ttk.Button(frame, text = "Guardar Cliente", command = self.add_clients).grid(row = 5, columnspan = 2, sticky = W + E)
 
         # Tabla
         self.tree = ttk.Treeview(height = 10, columns = 2)
-        self.tree.grid(row = 4, column = 0, columnspan = 2)
+        self.tree.grid(row = 6, column = 0, columnspan = 2)
         self.tree.heading('#0', text = 'Nombre', anchor = CENTER)
         self.tree.heading('#1', text = 'Apellido', anchor = CENTER)
 
@@ -55,7 +67,7 @@ class Product:
             self.tree.delete(element)
         
         # Query
-        query = 'SELECT * FROM cliente'
+        query = 'SELECT * FROM repositorioClientes'
         db_rows = self.run_query(query)
         for row in db_rows:
             self.tree.insert('', 0, values = row[1], text = row[2])
