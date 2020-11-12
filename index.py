@@ -24,30 +24,39 @@ class Product:
         # Botonera
         ttk.Button(frame, text = "Agregar cliente particular", command = self.add_clientspart_window).grid(row = 5, columnspan = 2, sticky = W + E)
         ttk.Button(frame, text = "Agregar cliente corporativo", command = self.add_clientscorp_window).grid(row = 6, columnspan = 2, sticky = W + E)
-        ttk.Button(frame, text = "Editar cliente", command = self.edit_clients_window).grid(row = 7, columnspan = 2, sticky = W + E)
 
         # Mensajes de salida
         self.message = Label(text = '', fg = 'red')
         self.message.grid(row = 8, column = 0, columnspan = 2, sticky = W + E)
 
         # Tabla
-        self.tree = ttk.Treeview(height = 10, columns = ("#1","#2","#3"))
-        self.tree.grid(row = 9, column = 0, columnspan = 5)
+        self.tree = ttk.Treeview(height = 10, columns = ("#1","#2","#3",'#4'))
+        self.tree.grid(row = 9, column = 0, columnspan = 6)
 
         self.tree.heading('#0', text = 'Nombre', anchor = CENTER)
         self.tree.heading('#1', text = 'Apellido', anchor = CENTER)
         self.tree.heading('#2', text = 'Teléfono', anchor = CENTER)
         self.tree.heading('#3', text = 'Mail', anchor = CENTER)
+        self.tree.heading('#4', text = 'ID', anchor = CENTER)
 
         #SubTabla
-        self.tree2 = ttk.Treeview(height = 10, columns = ("#1","#2","#3","#4"))
-        self.tree2.grid(row = 11, column = 0, columnspan = 5)
+        self.tree2 = ttk.Treeview(height = 10, columns = ("#1","#2","#3","#4",'#5'))
+        self.tree2.grid(row = 11, column = 0, columnspan = 6)
 
         self.tree2.heading('#0', text = 'Nombre de la Empresa', anchor = CENTER)
         self.tree2.heading('#1', text = 'Nombre de Contacto', anchor = CENTER)
         self.tree2.heading('#2', text = 'Teléfono', anchor = CENTER)
         self.tree2.heading('#3', text = 'Teléfono de contacto', anchor = CENTER)
         self.tree2.heading('#4', text = 'Mail', anchor = CENTER)
+        self.tree2.heading('#5', text = 'ID', anchor = CENTER)
+
+        # Botonera 2
+
+        ttk.Button(text = "Editar cliente particular", command = self.edit_clients_part_window).grid(row = 10, column = 1, columnspan = 2, sticky = W + E)
+        ttk.Button(text = "Eliminar cliente particular", command = self.delete_clients_part).grid(row = 10, column = 3, columnspan = 2, sticky = W + E)
+
+        ttk.Button(text = "Editar cliente corporativo", command = self.edit_clients_corp_window).grid(row = 12, column = 0, columnspan = 3, sticky = W + E)
+        ttk.Button(text = "Eliminar cliente", command = self.delete_clients_corp).grid(row = 12, column = 3, columnspan = 3, sticky = W + E)
 
         self.get_clients()
 
@@ -61,18 +70,23 @@ class Product:
     def get_clients(self, lista = None):
         # Limpio la tabla antes de arrancar la query
         records = self.tree.get_children()
+        records2 = self.tree2.get_children()
         for element in records:
             self.tree.delete(element)
+        for element2 in records2:
+            self.tree2.delete(element2)
         
         # Muestro clientes
         query = 'SELECT * FROM cliente JOIN cliente_particular ON cliente.id=cliente_particular.id_cliente ORDER BY id ASC'
         query1 = 'SELECT * FROM cliente JOIN cliente_corporativo ON cliente.id=cliente_corporativo.id_cliente ORDER BY id ASC'
         db_rows = self.run_query(query)
-        db_rows1 = self.run_query(query1)        
+        db_rows1 = self.run_query(query1)
+        #Particulares       
         for row in db_rows:
-            self.tree.insert('', 0, text = (row[4]), values = (row[5], row[1],row [2]))
+            self.tree.insert('', 0, text = (row[4]), values = (row[5],row[1], row[2],row[3]))
+        #Corporativos
         for fila in db_rows1:
-            self.tree2.insert('', 0, text = (fila[4]), values = (fila[5], fila[1], fila[6],fila[2]))
+            self.tree2.insert('', 0, text = (fila[4]), values = (fila[5], fila[1], fila[6],fila[2],fila[3]))
     
     def validations_particular(self):
         '''Valida que no haya espacios en blanco'''
@@ -187,8 +201,8 @@ class Product:
             else:
                 self.message['text'] = 'Nombre, Apellido, Teléfono y Mail son requeridos'
 
-    def edit_clients_window(self):
-        '''Editar un cliente'''
+    def edit_clients_part_window(self):
+        '''Ventana para editar un cliente particular'''
         self.message['text'] = ''
         try:
             self.tree.item(self.tree.selection())['text'][0]
@@ -199,54 +213,171 @@ class Product:
         old_surname = self.tree.item(self.tree.selection())['values'][0]
         old_phone = self.tree.item(self.tree.selection())['values'][1]
         old_mail = self.tree.item(self.tree.selection())['values'][2]
+        id_cliente1 = self.tree.item(self.tree.selection())['values'][3]
         self.edit_window = Toplevel()
         self.edit_window.title = 'Editar cliente'
 
+        # ID
+        Label(self.edit_window, text = 'ID: ').grid(row = 1, column = 1)
+        Entry(self.edit_window, textvariable = StringVar(self.edit_window, value = id_cliente1), state = 'readonly').grid(row = 1, column = 2)
+
         # Nombre Anterior
-        Label(self.edit_window, text = 'Nombre anterior: ').grid(row = 0, column = 1)
-        Entry(self.edit_window, textvariable = StringVar(self.edit_window, value = old_name), state = 'readonly').grid(row = 0, column = 2)
+        Label(self.edit_window, text = 'Nombre anterior: ').grid(row = 2, column = 1)
+        Entry(self.edit_window, textvariable = StringVar(self.edit_window, value = old_name), state = 'readonly').grid(row = 2, column = 2)
 
         # Nombre Actual
-        Label(self.edit_window, text = 'Nombre actual: ').grid(row = 1, column = 1)
-        Entry(self.edit_window).grid(row = 1, column = 2)
+        Label(self.edit_window, text = 'Nombre actual: ').grid(row = 3, column = 1)
+        new_name = Entry(self.edit_window)
+        new_name.grid(row = 3, column = 2)
 
         # Apellido Anterior
-        Label(self.edit_window, text = 'Apellido Anterior: ').grid(row = 2, column = 1)
-        Entry(self.edit_window, textvariable = StringVar(self.edit_window, value = old_surname), state = 'readonly').grid(row = 2, column = 2)
+        Label(self.edit_window, text = 'Apellido Anterior: ').grid(row = 4, column = 1)
+        Entry(self.edit_window, textvariable = StringVar(self.edit_window, value = old_surname), state = 'readonly').grid(row = 4, column = 2)
 
         # Nuevo Apellido
-        Label(self.edit_window, text = 'Apellido Actual: ').grid(row = 3, column = 1)
-        Entry(self.edit_window).grid(row = 3, column = 2)
+        Label(self.edit_window, text = 'Apellido Actual: ').grid(row = 5, column = 1)
+        new_surname = Entry(self.edit_window)
+        new_surname.grid(row = 5, column = 2)
 
         # Telefono Anterior
-        Label(self.edit_window, text = 'Telefono Anterior: ').grid(row = 4, column = 1)
-        Entry(self.edit_window, textvariable = StringVar(self.edit_window, value = old_phone), state = 'readonly').grid(row = 4, column = 2)
+        Label(self.edit_window, text = 'Telefono Anterior: ').grid(row = 6, column = 1)
+        Entry(self.edit_window, textvariable = StringVar(self.edit_window, value = old_phone), state = 'readonly').grid(row = 6, column = 2)
 
         # Nuevo Telefono
-        Label(self.edit_window, text = 'Telefono Actual: ').grid(row = 5, column = 1)
-        Entry(self.edit_window).grid(row = 5, column = 2)
+        Label(self.edit_window, text = 'Telefono Actual: ').grid(row = 7, column = 1)
+        new_phone = Entry(self.edit_window)
+        new_phone.grid(row = 7, column = 2)
 
-        # Telefono Anterior
-        Label(self.edit_window, text = 'Mail Anterior: ').grid(row = 6, column = 1)
-        Entry(self.edit_window, textvariable = StringVar(self.edit_window, value = old_mail), state = 'readonly').grid(row = 6, column = 2)
+        # Mail anterior
+        Label(self.edit_window, text = 'Mail Anterior: ').grid(row = 8, column = 1)
+        Entry(self.edit_window, textvariable = StringVar(self.edit_window, value = old_mail), state = 'readonly').grid(row = 8, column = 2)
 
-        # Nuevo Telefono
-        Label(self.edit_window, text = 'Mail Actual: ').grid(row = 7, column = 1)
-        Entry(self.edit_window).grid(row = 7, column = 2)
+        # Nuevo mail
+        Label(self.edit_window, text = 'Mail Actual: ').grid(row = 9, column = 1)
+        new_mail = Entry(self.edit_window)
+        new_mail.grid(row = 9, column = 2)
 
         # Botón de guardar cambios
-        ttk.Button(self.edit_window, text = 'Actualizar', command = lambda: self.edit_clients).grid(row = 8, columnspan = 3, sticky = W + E)
-
-    def edit_clients(self):
-        parameters = ClienteParticular(self.name.get(), self.surname.get(), self.phone.get(), self.mail.get())
-        parameters.id_cliente = self.rc.store(parameters)
-        self.lista_clientes.append(parameters)
-        self.message['text'] = 'El cliente personal {0} {1} ha sido añadido correctamente'.format(self.name.get(), self.surname.get())
-        self.name.delete(0, END)
-        self.surname.delete(0, END)
-        self.phone.delete(0, END)
-        self.mail.delete(0, END)
+        ttk.Button(self.edit_window, text = 'Actualizar', command = lambda: self.edit_clients_part(new_name.get(),new_surname.get(),new_phone.get(),new_mail.get(),id_cliente1)).grid(row = 10, columnspan = 3, sticky = W + E)
+    
+    def edit_clients_part(self, new_name, new_surname, new_phone, new_mail, id_cliente):
+        '''Editar un cliente particular'''
+        parameters = ClienteParticular(new_name,new_surname,new_phone,new_mail , id_cliente)
+        self.rc.update(parameters)
+        self.edit_window.destroy()
+        self.message['text'] = 'El cliente {0} {1} sido editado correctamente'.format(new_name, new_surname)
         self.get_clients()
+    
+    def edit_clients_corp_window(self):
+        '''Ventana para editar un cliente corporativo'''
+        self.message['text'] = ''
+        try:
+            self.tree2.item(self.tree2.selection())['text'][0]
+        except IndexError:
+            self.message['text'] = 'Por favor, seleccione un registro'
+            return
+        old_company_name = self.tree2.item(self.tree2.selection())['text']
+        old_contact_name = self.tree2.item(self.tree2.selection())['values'][0]
+        old_contact_phone = self.tree2.item(self.tree2.selection())['values'][1]
+        old_phone = self.tree2.item(self.tree2.selection())['values'][2]
+        old_mail = self.tree2.item(self.tree2.selection())['values'][3]
+        id_cliente = self.tree2.item(self.tree2.selection())['values'][4]
+        self.edit_window2 = Toplevel()
+        self.edit_window2.title = 'Editar cliente'
+
+        # ID
+        Label(self.edit_window2, text = 'ID: ').grid(row = 0, column = 1)
+        Entry(self.edit_window2, textvariable = StringVar(self.edit_window2, value = id_cliente), state = 'readonly').grid(row = 0, column = 2)
+
+        # Nombre de la empresa Anterior
+        Label(self.edit_window2, text = 'Nombre de la empresa anterior: ').grid(row = 1, column = 1)
+        Entry(self.edit_window2, textvariable = StringVar(self.edit_window2, value = old_company_name), state = 'readonly').grid(row = 1, column = 2)
+
+        # Nombre de la empresa Actual
+        Label(self.edit_window2, text = 'Nombre de la empresa actual: ').grid(row = 2, column = 1)
+        new_company_name = Entry(self.edit_window2)
+        new_company_name.grid(row = 2, column = 2)
+
+        # Nombre de contacto Anterior
+        Label(self.edit_window2, text = 'Nombre de contacto anterior: ').grid(row = 3, column = 1)
+        Entry(self.edit_window2, textvariable = StringVar(self.edit_window2, value = old_contact_name), state = 'readonly').grid(row = 3, column = 2)
+
+        # Nombre de contacto Actual
+        Label(self.edit_window2, text = 'Nombre de contacto actual: ').grid(row = 4, column = 1)
+        new_contact_name = Entry(self.edit_window2)
+        new_contact_name.grid(row = 4, column = 2)
+
+        # Telefono Anterior
+        Label(self.edit_window2, text = 'Telefono Anterior: ').grid(row = 5, column = 1)
+        Entry(self.edit_window2, textvariable = StringVar(self.edit_window2, value = old_phone), state = 'readonly').grid(row = 5, column = 2)
+
+        # Nuevo Telefono
+        Label(self.edit_window2, text = 'Telefono Actual: ').grid(row = 6, column = 1)
+        new_phone = Entry(self.edit_window2)
+        new_phone.grid(row = 6, column = 2)
+
+        # Telefono de contacto Anterior
+        Label(self.edit_window2, text = 'Telefono de contacto anterior: ').grid(row = 7, column = 1)
+        Entry(self.edit_window2, textvariable = StringVar(self.edit_window2, value = old_contact_phone), state = 'readonly').grid(row = 7, column = 2)
+
+        # Telefono de contacto actual
+        Label(self.edit_window2, text = 'Telefono de contacto actual: ').grid(row = 8, column = 1)
+        new_contact_phone = Entry(self.edit_window2)
+        new_contact_phone.grid(row = 8, column = 2)
+
+        # Mail Anterior
+        Label(self.edit_window2, text = 'Mail anterior: ').grid(row = 9, column = 1)
+        Entry(self.edit_window2, textvariable = StringVar(self.edit_window2, value = old_mail), state = 'readonly').grid(row = 9, column = 2)
+
+        # Mail actual
+        Label(self.edit_window2, text = 'Mail actual: ').grid(row = 10, column = 1)
+        new_mail = Entry(self.edit_window2)
+        new_mail.grid(row = 10, column = 2)
+
+        # Botón de guardar cambios
+        ttk.Button(self.edit_window2, text = 'Actualizar', command = lambda: self.edit_clients_corp(new_company_name.get(),new_contact_name.get(),new_contact_phone.get(), new_phone.get(), new_mail.get(), id_cliente)).grid(row = 11, columnspan = 3, sticky = W + E)
+
+    def edit_clients_corp(self, new_company_name, new_contact_name, new_contact_phone, new_phone, new_mail, id_cliente):
+        '''Editar un cliente corporativo'''
+        parameters = ClienteCorporativo(new_company_name,new_contact_name,new_contact_phone,new_phone,new_mail,id_cliente)
+        self.rc.update(parameters)
+        self.edit_window2.destroy()
+        self.message['text'] = 'El cliente {0} de la empresa {1} ha sido editado correctamente'.format(new_contact_name, new_company_name)
+        self.get_clients()
+
+    def delete_clients_part(self):
+        '''Eliminar a un cliente particular'''
+        name = self.tree.item(self.tree.selection())['text']
+        surname = self.tree.item(self.tree.selection())['values'][0]
+        phone = self.tree.item(self.tree.selection())['values'][1]
+        mail = self.tree.item(self.tree.selection())['values'][2]
+        id_cliente1 = self.tree.item(self.tree.selection())['values'][3]
+        try:
+            self.tree.item(self.tree.selection())['text']
+        except IndexError:
+            self.message['text'] = 'Seleccione a un cliente'
+        name = self.tree.item(self.tree.selection())['text']
+        parameters = ClienteParticular(name,surname,phone,mail,id_cliente1)
+        self.rc.delete(parameters)
+        self.message['text'] = 'El cliente {0} {1} sido editado correctamente'.format(name, surname)
+        self.get_clients()
+
+    def delete_clients_corp(self):
+       '''Eliminar a un cliente corporativo'''
+       company_name = self.tree2.item(self.tree2.selection())['text']
+       contact_name = self.tree2.item(self.tree2.selection())['values'][0]
+       contact_phone = self.tree2.item(self.tree2.selection())['values'][1]
+       phone = self.tree2.item(self.tree2.selection())['values'][2]
+       mail = self.tree2.item(self.tree2.selection())['values'][3]
+       id_cliente1 = self.tree2.item(self.tree2.selection())['values'][4]
+       try:
+           self.tree.item(self.tree2.selection())['text']
+       except IndexError:
+           self.message['text'] = 'Seleccione a un cliente'
+       parameters = ClienteCorporativo(company_name,contact_name,contact_phone,phone,mail,id_cliente1)
+       self.rc.delete(parameters)
+       self.message['text'] = 'El cliente {0} de la empresa {1} sido eliminado correctamente'.format(contact_name, company_name)
+       self.get_clients()
 
 if __name__ == '__main__':
     window = Tk()

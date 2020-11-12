@@ -60,7 +60,6 @@ class RepositorioClientes(Repositorio):
             return ClienteParticular(result[0], result[1], result[2], 
                                       result[3], id_cliente)
         
-    
     def get_all(self):
         '''Retorna una lista, compuesta por objetos Cliente, tanto particulares
         como corporativos'''
