@@ -70,7 +70,7 @@ class RepositorioClientes(Repositorio):
         '''Retorna una lista, compuesta por todos los objetos
         ClienteParticular'''
         lista_clientes = []
-        # Consultamos primero los clientes c orporativos:
+        # Consultamos primero los clientes corporativos:
         consulta = "SELECT c.id, cp.nombre, cp.apellido, c.telefono, c.mail \
                     FROM cliente_particular cp \
                     JOIN cliente c ON c.id = cp.id_cliente"
