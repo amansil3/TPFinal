@@ -3,6 +3,7 @@ from tkinter import ttk, Label, LabelFrame, Entry, StringVar, Tk, CENTER, W, E, 
 from clienteCorporativo import ClienteCorporativo
 from clienteParticular import ClienteParticular
 from repositorioClientes import RepositorioClientes
+from repositorioTrabajos import RepositorioTrabajos
 
 
 import sqlite3
@@ -13,24 +14,26 @@ class Product:
 
     def __init__(self, window):
         self.wind = window
-        self.wind.title('Listado de Clientes')
+        self.wind.title('Sistema de gestion de trabajos')
         self.rc = RepositorioClientes()
         self.lista_clientes = self.rc.get_all_particulares()
+        self.rt = RepositorioTrabajos()
 
         #Frame
-        frame = LabelFrame(self.wind, text = 'Registrar un nuevo cliente')
-        frame.grid(row = 0, column = 0, columnspan = 3, pady = 20)
+        frame = LabelFrame(self.wind, text = 'Menu principal')
+        frame.grid(row = 0, column = 0, columnspan = 8, pady = 20)
 
         # Botonera
-        ttk.Button(frame, text = "Agregar cliente particular", command = self.add_clientspart_window).grid(row = 5, columnspan = 2, sticky = W + E)
-        ttk.Button(frame, text = "Agregar cliente corporativo", command = self.add_clientscorp_window).grid(row = 6, columnspan = 2, sticky = W + E)
+        ttk.Button(frame, text = "Agregar cliente particular", command = self.add_clientspart_window).grid(row = 1 , column = 4, columnspan = 2, sticky = W + E)
+        ttk.Button(frame, text = "Agregar cliente corporativo", command = self.add_clientscorp_window).grid(row = 2, column = 4 ,columnspan = 2, sticky = W + E)
+        ttk.Button(frame, text = "Agregar un trabajo", command = self.add_works_window).grid(row = 3, column = 4, columnspan = 2, sticky = W + E)
 
         # Mensajes de salida
         self.message = Label(text = '', fg = 'red')
         self.message.grid(row = 8, column = 0, columnspan = 2, sticky = W + E)
 
         # Tabla
-        self.tree = ttk.Treeview(height = 10, columns = ("#1","#2","#3",'#4'))
+        self.tree = ttk.Treeview(height = 5, columns = ("#1","#2","#3",'#4'))
         self.tree.grid(row = 9, column = 0, columnspan = 6)
 
         self.tree.heading('#0', text = 'Nombre', anchor = CENTER)
@@ -39,8 +42,8 @@ class Product:
         self.tree.heading('#3', text = 'Mail', anchor = CENTER)
         self.tree.heading('#4', text = 'ID', anchor = CENTER)
 
-        #SubTabla
-        self.tree2 = ttk.Treeview(height = 10, columns = ("#1","#2","#3","#4",'#5'))
+        # Tabla clientes corporativos
+        self.tree2 = ttk.Treeview(height = 5, columns = ("#1","#2","#3","#4",'#5'))
         self.tree2.grid(row = 11, column = 0, columnspan = 6)
 
         self.tree2.heading('#0', text = 'Nombre de la Empresa', anchor = CENTER)
@@ -50,15 +53,32 @@ class Product:
         self.tree2.heading('#4', text = 'Mail', anchor = CENTER)
         self.tree2.heading('#5', text = 'ID', anchor = CENTER)
 
+        # Tabla trabajos
+        self.tree3 = ttk.Treeview(height = 5, columns = ("#1","#2","#3","#4",'#5','#6'))
+        self.tree3.grid(row = 13, column = 0, columnspan = 6)
+
+        self.tree3.heading('#0', text = 'ID de trabajo', anchor = CENTER)
+        self.tree3.heading('#1', text = 'Nombre de cliente', anchor = CENTER)
+        self.tree3.heading('#2', text = 'Fecha de Ingreso', anchor = CENTER)
+        self.tree3.heading('#3', text = 'Fecha de Entrega Propuesta', anchor = CENTER)
+        self.tree3.heading('#4', text = 'Fecha de Entrega Real', anchor = CENTER)
+        self.tree3.heading('#5', text = 'Descripción', anchor = CENTER)
+        self.tree3.heading('#6', text = 'Entregado', anchor = CENTER)
+
         # Botonera 2
+        ttk.Button(text = "Editar cliente particular", command = self.edit_clients_part_window).grid(row = 10, column = 1, columnspan = 2)
+        ttk.Button(text = "Eliminar cliente particular", command = self.delete_clients_part).grid(row = 10, column = 3, columnspan = 2)
 
-        ttk.Button(text = "Editar cliente particular", command = self.edit_clients_part_window).grid(row = 10, column = 1, columnspan = 2, sticky = W + E)
-        ttk.Button(text = "Eliminar cliente particular", command = self.delete_clients_part).grid(row = 10, column = 3, columnspan = 2, sticky = W + E)
-
-        ttk.Button(text = "Editar cliente corporativo", command = self.edit_clients_corp_window).grid(row = 12, column = 0, columnspan = 3, sticky = W + E)
-        ttk.Button(text = "Eliminar cliente", command = self.delete_clients_corp).grid(row = 12, column = 3, columnspan = 3, sticky = W + E)
-
+        ttk.Button(text = "Editar cliente corporativo", command = self.edit_clients_corp_window).grid(row = 12, column = 0, columnspan = 3)
+        ttk.Button(text = "Eliminar cliente corporativo", command = self.delete_clients_corp).grid(row = 12, column = 3, columnspan = 3)
+        
+        ttk.Button(text = "Editar fecha de entrega real", command = '').grid(row = 14, column = 0, columnspan = 3)
+        ttk.Button(text = "Cambiar estado del trabajo", command = '').grid(row = 14, column = 1, columnspan = 3)
+        ttk.Button(text = "Modificar datos del trabajo", command = '').grid(row = 14, column = 2, columnspan = 3)
+        ttk.Button(text = "Cancelar trabajo", command = '').grid(row = 14, column = 3, columnspan = 3)
+        
         self.get_clients()
+        self.get_works()
 
     def run_query (self, query, parameters = ()):
         with sqlite3.connect(self.nombre_bd) as Conectar:
@@ -88,6 +108,33 @@ class Product:
         for fila in db_rows1:
             self.tree2.insert('', 0, text = (fila[4]), values = (fila[5], fila[1], fila[6],fila[2],fila[3]))
     
+    def get_works(self, lista = None):
+        # Limpio la tabla antes de arrancar la query
+        registros = self.tree3.get_children()
+        for element3 in registros:
+            self.tree3.delete(element3)
+        
+        # Muestro los trabajos
+        #INSERT INTO trabajos (id,id_cliente,fecha_ingreso,fecha_entrega_propuesta,fecha_entrega_real,descripcion,retirado) VALUES (1,30,12/11/2020,12/11/2020,12/11/2020,'Telefono averiado',true)
+        query = 'SELECT trabajos.id_cliente, trabajos.fecha_ingreso, trabajos.fecha_entrega_propuesta, cliente.id,\
+             trabajos.fecha_entrega_real, trabajos.descripcion, trabajos.retirado, trabajos.id, \
+                 cliente_corporativo.nombre_contacto \
+                     FROM trabajos \
+                         JOIN cliente ON trabajos.id_cliente = cliente.id \
+                             JOIN cliente_corporativo ON cliente.id = cliente_corporativo.id_cliente'
+        query2 = 'SELECT trabajos.id_cliente, trabajos.fecha_ingreso, trabajos.fecha_entrega_propuesta, cliente.id,\
+             trabajos.fecha_entrega_real, trabajos.descripcion, trabajos.retirado, trabajos.id, \
+                 cliente_particular.nombre,cliente_particular.apellido \
+                     FROM trabajos \
+                         JOIN cliente ON trabajos.id_cliente = cliente.id \
+                             JOIN cliente_particular ON cliente.id = cliente_particular.id_cliente'
+        filas_db = self.run_query(query)
+        filas2_db = self.run_query(query2)
+        for filas in filas_db:
+            self.tree3.insert('', 0, text = (filas[7]), values = (filas[8],filas[1], filas[2],filas[4], filas[5],filas[6]))
+        for filas2 in filas2_db:
+            self.tree3.insert('', 0, text = (filas2[7]), values = (filas2[8]+' '+filas2[9],filas2[1], filas2[2],filas2[4], filas2[5],filas2[6]))
+
     def validations_particular(self):
         '''Valida que no haya espacios en blanco'''
         return  len(self.name.get()) !=0 and len(self.surname.get()) !=0 and len(self.phone.get()) !=0 and len(self.mail.get()) !=0
@@ -378,6 +425,71 @@ class Product:
        self.rc.delete(parameters)
        self.message['text'] = 'El cliente {0} de la empresa {1} sido eliminado correctamente'.format(contact_name, company_name)
        self.get_clients()
+
+    def add_works_window(self):
+
+        self.add_window_work = Toplevel()
+        self.add_window_work.title = 'Agregar trabajo'
+
+        # Input ID
+        Label(self.add_window_work, text = 'ID del cliente: ').grid(row = 1, column = 0)
+        Entry(self.add_window_work)
+        self.id_cliente = Entry(self.add_window_work)
+        self.id_cliente.focus()
+        self.id_cliente.grid(row = 1, column = 1)
+
+        # Input Fecha de Ingreso
+        Label(self.add_window_work, text = 'Fecha de Ingreso: ').grid(row = 2, column = 0)
+        Entry(self.add_window_work)
+        self.entry_date = Entry(self.add_window_work)
+        self.entry_date.grid(row = 2, column = 1)
+
+        # Input Fecha de Entrega Propuesta
+        Label(self.add_window_work, text = 'Fecha de Entrega Propuesta: ').grid(row = 3, column = 0)
+        Entry(self.add_window_work)
+        self.proposal_delivery_date = Entry(self.add_window_work)
+        self.proposal_delivery_date.grid(row = 3, column = 1)
+
+        # Input Fecha de Entrega Real
+        Label(self.add_window_work, text = 'Fecha de Entrega Real: ').grid(row = 4, column = 0)
+        Entry(self.add_window_work)
+        self.real_delivery_date = Entry(self.add_window_work)
+        self.real_delivery_date.grid(row = 4, column = 1)
+        
+        # Input Descripcion
+        Label(self.add_window_work, text = 'Descripcion: ').grid(row = 5, column = 0)
+        Entry(self.add_window_work)
+        self.description = Entry(self.add_window_work)
+        self.description.grid(row = 5, column = 1)
+
+        # Input Retirado
+        Label(self.add_window_work, text = 'Retirado: ').grid(row = 6, column = 0)
+        Entry(self.add_window_work)
+        self.withdrawn = Entry(self.add_window_work)
+        self.withdrawn.grid(row = 6, column = 1)
+
+        # Botonera
+        ttk.Button(self.add_window_work, text = "Guardar", command = '').grid(row = 7, columnspan = 2, sticky = W + E)
+
+    def validations_work(self):
+        '''Valida que no haya espacios en blanco'''
+        return  len(self.id_cliente.get()) !=0 and len(self.entry_date.get()) !=0 and len(self.proposal_delivery_date.get()) !=0 and len(self.real_delivery_date.get()) !=0 and len(self.description.get()) !=0 and len(self.withdrawn.get()) !=0
+
+    def add_work(self):
+        #si las validaciones son correctas
+        if self.validations_work():
+            parameters = ClienteParticular(self.name.get(), self.surname.get(), self.phone.get(), self.mail.get())
+            parameters.id_cliente = self.rc.store(parameters)
+            self.lista_clientes.append(parameters)
+            self.message['text'] = 'El cliente personal {0} {1} ha sido añadido correctamente'.format(self.name.get(), self.surname.get())
+            self.name.delete(0, END)
+            self.surname.delete(0, END)
+            self.phone.delete(0, END)
+            self.mail.delete(0, END)
+            self.get_clients()
+            return parameters
+        else:
+            self.message['text'] = 'Nombre, Apellido, Teléfono y Mail son requeridos'
 
 if __name__ == '__main__':
     window = Tk()
