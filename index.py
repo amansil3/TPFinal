@@ -76,7 +76,7 @@ class Product:
         ttk.Button(text = "Finalizar trabajo", command = self.trabajo_finalizado).grid(row = 14, column = 0, columnspan = 3)
         ttk.Button(text = "Entregar el trabajo", command = self.trabajo_entregado).grid(row = 14, column = 1, columnspan = 3)
         ttk.Button(text = "Modificar datos del trabajo", command = self.edit_trabajos_window).grid(row = 14, column = 2, columnspan = 3)
-        ttk.Button(text = "Cancelar trabajo", command = '').grid(row = 14, column = 3, columnspan = 3)
+        ttk.Button(text = "Cancelar trabajo", command = self.eliminar_trabajo_confirmacion).grid(row = 14, column = 3, columnspan = 3)
         
         self.get_clients()
         self.get_works()
@@ -629,6 +629,44 @@ class Product:
             self.message['text'] = 'El trabajo {0} sido entregado correctamente'.format(id_trabajo)
         else:
             self.message['text'] = 'El trabajo no ha sido editado'
+        self.get_works()
+
+    def eliminar_trabajo_confirmacion(self):
+        '''ventana para confirmar la eliminación de los trabajos'''      
+        # Creo ventana
+        self.delete_work_window = Toplevel()
+        self.delete_work_window.title = 'Eliminar trabajo'
+        
+        # Label
+        label = Label(self.delete_work_window, text = '¿Está seguro que desea eliminar el trabajo?')
+        label.grid(row = 1, column = 0)
+
+        # Botón de Confirmar
+        ttk.Button(self.delete_work_window, text = 'Sí, eliminar', command = lambda: self.eliminar_trabajo()).grid(row = 2, column = 0)
+        # Botón Cancelar
+        ttk.Button(self.delete_work_window, text = 'NO, cancelar', command = lambda: self.delete_work_window.destroy()).grid(row = 3, column = 0)
+
+    def eliminar_trabajo(self):
+        '''Eliminar un trabajo de la BD'''
+
+        # Obtengo los datos actuales del objeto en cuestión
+        description = self.tree3.item(self.tree3.selection())['values'][4]
+        entry_date = self.tree3.item(self.tree3.selection())['values'][1]
+        id_cliente = self.tree3.item(self.tree3.selection())['values'][0]
+        proposal_delivery_date = self.tree3.item(self.tree3.selection())['values'][2]
+        real_delivery_date = self.tree3.item(self.tree3.selection())['values'][3]
+        withdrawn = self.tree3.item(self.tree3.selection())['values'][5]
+        id_trabajo = self.tree3.item(self.tree3.selection())['text']
+
+        # Paso parametros al obj Trabajo
+        parameters = Trabajo(id_cliente,entry_date,proposal_delivery_date,real_delivery_date,description,withdrawn, id_trabajo)
+        a = self.rt.delete(parameters)
+        
+        # Códigos de éxito o error y retorno la lista de trabajos actualizados
+        if a:
+            self.message['text'] = 'El trabajo {0} sido eliminado correctamente'.format(id_trabajo)
+        else:
+            self.message['text'] = 'El trabajo no ha sido eliminado'
         self.get_works()
 
 if __name__ == '__main__':
