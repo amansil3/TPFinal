@@ -481,35 +481,20 @@ class Product:
             fecha_ent_pro = datetime.strptime(self.proposal_delivery_date.get(), '%d-%m-%Y')
             fecha_ent_pro.strftime('%Y-%m-%d')
             parameters = Trabajo(obj_cliente, fe_entrada, fecha_ent_pro, None, self.description.get(), False, None)
-            print (obj_cliente)
-            print (parameters)
             a = self.rt.store(parameters)
-            print (a)
             if a:
-                self.message['text'] = 'El trabajo del cliente {0} ha sido añadido correctamente'.format(self.id_cliente_entry)
+                self.message['text'] = 'El trabajo del cliente {0} ha sido añadido correctamente'.format(self.id_cliente_entry.get())
             else:
                 self.message['text'] = 'El trabajo del cliente no se ha sido añadido. Código de error: 0'
             self.get_works()
-            #self.id_cliente_entry.delete(0, END)
-            #self.entry_date.delete(0, END)
-            #self.proposal_delivery_date.delete(0, END)
-            #self.real_delivery_date.delete(0, END)
-            #self.description.delete(0, END)
-            #self.withdrawn.delete(0, END)
-            #return parameters
+            self.id_cliente_entry.delete(0, END)
+            self.entry_date.delete(0, END)
+            self.proposal_delivery_date.delete(0, END)
+            self.real_delivery_date.delete(0, END)
+            self.description.delete(0, END)
+            self.withdrawn.delete(0, END)
         else:
             self.message['text'] = 'Todos los campos son requeridos'
-
-    def trabajo_finalizado(self):
-       '''Finaliza un trabajo, cambiando su fecha entrega real a hoy'''
-       try:
-           self.tree3.item(self.tree3.selection())['text']
-       except IndexError:
-           self.message['text'] = 'Seleccione un trabajo'
-       #parameters = ClienteCorporativo(company_name,contact_name,contact_phone,phone,mail,id_cliente1)
-       #self.rc.delete(parameters)
-       #self.message['text'] = 'El cliente {0} de la empresa {1} sido eliminado correctamente'.format(contact_name, company_name)
-       #self.get_clients()
 
     def retirado(self):
        '''Se cambia su estado de retirado a True'''
@@ -578,6 +563,37 @@ class Product:
         a = self.rt.update(parameters)
         if a:
             self.edit_work_window.destroy()
+            self.message['text'] = 'El trabajo sido editado correctamente'
+        else:
+            self.message['text'] = 'El trabajo no ha sido editado'
+        self.get_works()
+
+    def trabajo_finalizado(self):
+        '''Cambiar el estado a finalizado, modificando su fecha de entrega real a hoy'''
+        # Obtengo la fecha de hoy
+        hoy = date.today()
+        hoy.strftime('%d, %m, %Y')
+
+        # Obtengo los datos actuales del objeto en cuestión
+        description = self.tree3.item(self.tree3.selection())['values'][4]
+        entry_date = self.tree3.item(self.tree3.selection())['values'][1]
+        id_cliente = self.tree3.item(self.tree3.selection())['values'][0]
+        proposal_delivery_date = self.tree3.item(self.tree3.selection())['values'][2]
+        #old_real_delivery_date = self.tree3.item(self.tree3.selection())['values'][3]
+        withdrawn = self.tree3.item(self.tree3.selection())['values'][5]
+        id_trabajo = self.tree3.item(self.tree3.selection())['text']
+
+        # Formateo las fechas
+        nueva_fecha = datetime.strptime(entry_date, '%Y-%m-%d')
+        nueva_fecha.strftime('%Y-%m-%d')
+        fecha_ent_pro = datetime.strptime(proposal_delivery_date, '%Y-%m-%d')
+        fecha_ent_pro.strftime('%Y-%m-%d')
+
+        # Paso parametros al obj Trabajo
+        parameters = Trabajo(id_cliente,nueva_fecha,fecha_ent_pro,hoy,description,withdrawn, id_trabajo)
+        print (parameters)
+        a = self.rt.update(parameters)
+        if a:
             self.message['text'] = 'El trabajo sido editado correctamente'
         else:
             self.message['text'] = 'El trabajo no ha sido editado'
