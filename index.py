@@ -447,21 +447,11 @@ class Product:
         Label(self.add_window_work, text = 'Fecha de Entrega Propuesta: ').grid(row = 3, column = 0)
         self.proposal_delivery_date = Entry(self.add_window_work)
         self.proposal_delivery_date.grid(row = 3, column = 1)
-
-        # Input Fecha de Entrega Real
-        Label(self.add_window_work, text = 'Fecha de Entrega Real: ').grid(row = 4, column = 0)
-        self.real_delivery_date = Entry(self.add_window_work)
-        self.real_delivery_date.grid(row = 4, column = 1)
-        
+      
         # Input Descripcion
         Label(self.add_window_work, text = 'Descripcion: ').grid(row = 5, column = 0)
         self.description = Entry(self.add_window_work)
         self.description.grid(row = 5, column = 1)
-
-        # Input Retirado
-        Label(self.add_window_work, text = 'Retirado: ').grid(row = 6, column = 0)
-        self.withdrawn = Entry(self.add_window_work)
-        self.withdrawn.grid(row = 6, column = 1)
 
         # Botonera
         ttk.Button(self.add_window_work, text = "Guardar", command = self.add_work).grid(row = 7, columnspan = 2, sticky = W + E)
@@ -490,9 +480,7 @@ class Product:
             self.id_cliente_entry.delete(0, END)
             self.entry_date.delete(0, END)
             self.proposal_delivery_date.delete(0, END)
-            self.real_delivery_date.delete(0, END)
             self.description.delete(0, END)
-            self.withdrawn.delete(0, END)
         else:
             self.message['text'] = 'Todos los campos son requeridos'
 
