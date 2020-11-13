@@ -73,8 +73,8 @@ class Product:
         ttk.Button(text = "Editar cliente corporativo", command = self.edit_clients_corp_window).grid(row = 12, column = 0, columnspan = 3)
         ttk.Button(text = "Eliminar cliente corporativo", command = self.delete_clients_corp).grid(row = 12, column = 3, columnspan = 3)
         
-        ttk.Button(text = "Editar fecha de entrega real", command = self.trabajo_finalizado).grid(row = 14, column = 0, columnspan = 3)
-        ttk.Button(text = "Cambiar estado del trabajo", command = '').grid(row = 14, column = 1, columnspan = 3)
+        ttk.Button(text = "Finalizar trabajo", command = self.trabajo_finalizado).grid(row = 14, column = 0, columnspan = 3)
+        ttk.Button(text = "Entregar el trabajo", command = self.trabajo_entregado).grid(row = 14, column = 1, columnspan = 3)
         ttk.Button(text = "Modificar datos del trabajo", command = self.edit_trabajos_window).grid(row = 14, column = 2, columnspan = 3)
         ttk.Button(text = "Cancelar trabajo", command = '').grid(row = 14, column = 3, columnspan = 3)
         
@@ -595,6 +595,38 @@ class Product:
         a = self.rt.update(parameters)
         if a:
             self.message['text'] = 'El trabajo sido editado correctamente'
+        else:
+            self.message['text'] = 'El trabajo no ha sido editado'
+        self.get_works()
+
+    def trabajo_entregado(self):
+        '''Cambiar el estado a entregado'''
+
+        # Obtengo los datos actuales del objeto en cuestión
+        description = self.tree3.item(self.tree3.selection())['values'][4]
+        entry_date = self.tree3.item(self.tree3.selection())['values'][1]
+        id_cliente = self.tree3.item(self.tree3.selection())['values'][0]
+        proposal_delivery_date = self.tree3.item(self.tree3.selection())['values'][2]
+        real_delivery_date = self.tree3.item(self.tree3.selection())['values'][3]
+        #withdrawn = self.tree3.item(self.tree3.selection())['values'][5]
+        id_trabajo = self.tree3.item(self.tree3.selection())['text']
+
+        # Formateo las fechas
+        nueva_fecha = datetime.strptime(entry_date, '%Y-%m-%d')
+        nueva_fecha.strftime('%Y-%m-%d')
+        fecha_ent_pro = datetime.strptime(proposal_delivery_date, '%Y-%m-%d')
+        fecha_ent_pro.strftime('%Y-%m-%d')
+        fecha_ent_real = datetime.strptime(real_delivery_date, '%Y-%m-%d')
+        fecha_ent_real.strftime('%Y-%m-%d')
+
+        withdrawn = True
+
+        # Paso parametros al obj Trabajo
+        parameters = Trabajo(id_cliente,nueva_fecha,fecha_ent_pro,fecha_ent_real,description,withdrawn, id_trabajo)
+        print (parameters)
+        a = self.rt.update(parameters)
+        if a:
+            self.message['text'] = 'El trabajo {0} sido entregado correctamente'.format(id_trabajo)
         else:
             self.message['text'] = 'El trabajo no ha sido editado'
         self.get_works()
