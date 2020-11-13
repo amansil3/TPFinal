@@ -73,10 +73,11 @@ class Product:
         ttk.Button(text = "Editar cliente corporativo", command = self.edit_clients_corp_window).grid(row = 12, column = 0, columnspan = 3)
         ttk.Button(text = "Eliminar cliente corporativo", command = self.delete_clients_corp).grid(row = 12, column = 3, columnspan = 3)
         
-        ttk.Button(text = "Finalizar trabajo", command = self.trabajo_finalizado).grid(row = 14, column = 0, columnspan = 3)
-        ttk.Button(text = "Entregar el trabajo", command = self.trabajo_entregado).grid(row = 14, column = 1, columnspan = 3)
-        ttk.Button(text = "Modificar datos del trabajo", command = self.edit_trabajos_window).grid(row = 14, column = 2, columnspan = 3)
-        ttk.Button(text = "Cancelar trabajo", command = self.eliminar_trabajo_confirmacion).grid(row = 14, column = 3, columnspan = 3)
+        ttk.Button(text = "Finalizar trabajo", command = self.trabajo_finalizado).grid(row = 14, column = 0, columnspan = 2)
+        ttk.Button(text = "Entregar el trabajo", command = self.trabajo_entregado).grid(row = 14, column = 1, columnspan = 2)
+        ttk.Button(text = "Modificar datos del trabajo", command = self.edit_trabajos_window).grid(row = 14, column = 2, columnspan = 2)
+        ttk.Button(text = "Cancelar trabajo", command = self.eliminar_trabajo_confirmacion).grid(row = 14, column = 3, columnspan = 2)
+        ttk.Button(text = "Informe de trabajos pendientes", command = self.informe).grid(row = 14, column = 4, columnspan = 2)
         
         self.get_clients()
         self.get_works()
@@ -656,6 +657,55 @@ class Product:
         else:
             self.message['text'] = 'El trabajo no ha sido eliminado'
         self.get_works()
+
+    def informe(self):
+
+        # Creo ventana
+        self.informe_trabajos_window = Toplevel()
+        self.informe_trabajos_window.title = 'Informe'
+
+        # Obtengo la fecha de hoy
+        hoy = date.today()
+        hoyhoy = hoy.strftime('%Y-%m-%d')
+
+        # Traigo todos los parámetros para comparar la fecha y la entrega
+        trabajos_deben = []
+        clientes_deben = []
+        trabajos_no_deben = []
+        clientes_no_deben = []
+        fecha_propuesta = []
+
+        trabajos_realmente_deben = []
+
+        for Parent in self.tree3.get_children():
+            entregado = self.tree3.item(Parent)["values"][5]
+            id_cliente = self.tree3.item(Parent)['text']
+            fecha_entrega_propuesta = self.tree3.item(Parent)['values'][3]
+            if entregado == 0:
+                trabajos_deben.append(entregado)
+                clientes_deben.append(id_cliente)
+                fecha_propuesta.append(fecha_entrega_propuesta)
+            else:
+                trabajos_no_deben.append(entregado)
+                clientes_no_deben.append(id_cliente)
+        
+        #print (fecha_propuesta)
+        cant_trabajos = len(trabajos_deben)
+
+        for i in fecha_propuesta:
+            if i <= hoyhoy:
+                trabajos_realmente_deben.append (i)
+
+        print ("Al dia de hoy",hoyhoy,"faltan entregar",cant_trabajos, "trabajos")
+        # Label
+        label = Label(self.informe_trabajos_window, text = 'Informes')
+        label.grid(row = 1, column = 0)
+
+        label2 = Label(self.informe_trabajos_window, text = "El informe sale por consola")
+        label2.grid(row = 1, column = 0)
+
+        # Botón Cierre
+        ttk.Button(self.informe_trabajos_window, text = 'Cerrar', command = lambda: self.informe_trabajos_window.destroy()).grid(row = 2, column = 0)    
 
 if __name__ == '__main__':
     window = Tk()
