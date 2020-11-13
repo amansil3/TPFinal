@@ -4,7 +4,8 @@ from clienteCorporativo import ClienteCorporativo
 from clienteParticular import ClienteParticular
 from repositorioClientes import RepositorioClientes
 from repositorioTrabajos import RepositorioTrabajos
-
+from trabajo import Trabajo
+from datetime import *
 
 import sqlite3
 
@@ -72,9 +73,9 @@ class Product:
         ttk.Button(text = "Editar cliente corporativo", command = self.edit_clients_corp_window).grid(row = 12, column = 0, columnspan = 3)
         ttk.Button(text = "Eliminar cliente corporativo", command = self.delete_clients_corp).grid(row = 12, column = 3, columnspan = 3)
         
-        ttk.Button(text = "Editar fecha de entrega real", command = '').grid(row = 14, column = 0, columnspan = 3)
+        ttk.Button(text = "Editar fecha de entrega real", command = self.trabajo_finalizado).grid(row = 14, column = 0, columnspan = 3)
         ttk.Button(text = "Cambiar estado del trabajo", command = '').grid(row = 14, column = 1, columnspan = 3)
-        ttk.Button(text = "Modificar datos del trabajo", command = '').grid(row = 14, column = 2, columnspan = 3)
+        ttk.Button(text = "Modificar datos del trabajo", command = self.edit_trabajos_window).grid(row = 14, column = 2, columnspan = 3)
         ttk.Button(text = "Cancelar trabajo", command = '').grid(row = 14, column = 3, columnspan = 3)
         
         self.get_clients()
@@ -115,7 +116,6 @@ class Product:
             self.tree3.delete(element3)
         
         # Muestro los trabajos
-        #INSERT INTO trabajos (id,id_cliente,fecha_ingreso,fecha_entrega_propuesta,fecha_entrega_real,descripcion,retirado) VALUES (1,30,12/11/2020,12/11/2020,12/11/2020,'Telefono averiado',true)
         query = 'SELECT trabajos.id_cliente, trabajos.fecha_ingreso, trabajos.fecha_entrega_propuesta, cliente.id,\
              trabajos.fecha_entrega_real, trabajos.descripcion, trabajos.retirado, trabajos.id, \
                  cliente_corporativo.nombre_contacto \
@@ -430,66 +430,158 @@ class Product:
 
         self.add_window_work = Toplevel()
         self.add_window_work.title = 'Agregar trabajo'
-
+        
         # Input ID
+        
         Label(self.add_window_work, text = 'ID del cliente: ').grid(row = 1, column = 0)
-        Entry(self.add_window_work)
-        self.id_cliente = Entry(self.add_window_work)
-        self.id_cliente.focus()
-        self.id_cliente.grid(row = 1, column = 1)
+        self.id_cliente_entry = Entry(self.add_window_work)
+        self.id_cliente_entry.focus()
+        self.id_cliente_entry.grid(row = 1, column = 1)
 
         # Input Fecha de Ingreso
         Label(self.add_window_work, text = 'Fecha de Ingreso: ').grid(row = 2, column = 0)
-        Entry(self.add_window_work)
         self.entry_date = Entry(self.add_window_work)
         self.entry_date.grid(row = 2, column = 1)
 
         # Input Fecha de Entrega Propuesta
         Label(self.add_window_work, text = 'Fecha de Entrega Propuesta: ').grid(row = 3, column = 0)
-        Entry(self.add_window_work)
         self.proposal_delivery_date = Entry(self.add_window_work)
         self.proposal_delivery_date.grid(row = 3, column = 1)
 
         # Input Fecha de Entrega Real
         Label(self.add_window_work, text = 'Fecha de Entrega Real: ').grid(row = 4, column = 0)
-        Entry(self.add_window_work)
         self.real_delivery_date = Entry(self.add_window_work)
         self.real_delivery_date.grid(row = 4, column = 1)
         
         # Input Descripcion
         Label(self.add_window_work, text = 'Descripcion: ').grid(row = 5, column = 0)
-        Entry(self.add_window_work)
         self.description = Entry(self.add_window_work)
         self.description.grid(row = 5, column = 1)
 
         # Input Retirado
         Label(self.add_window_work, text = 'Retirado: ').grid(row = 6, column = 0)
-        Entry(self.add_window_work)
         self.withdrawn = Entry(self.add_window_work)
         self.withdrawn.grid(row = 6, column = 1)
 
         # Botonera
-        ttk.Button(self.add_window_work, text = "Guardar", command = '').grid(row = 7, columnspan = 2, sticky = W + E)
+        ttk.Button(self.add_window_work, text = "Guardar", command = self.add_work).grid(row = 7, columnspan = 2, sticky = W + E)
 
     def validations_work(self):
-        '''Valida que no haya espacios en blanco'''
-        return  len(self.id_cliente.get()) !=0 and len(self.entry_date.get()) !=0 and len(self.proposal_delivery_date.get()) !=0 and len(self.real_delivery_date.get()) !=0 and len(self.description.get()) !=0 and len(self.withdrawn.get()) !=0
+        #'''Valida que no haya espacios en blanco'''
+        return  len(self.id_cliente_entry.get())
 
     def add_work(self):
         #si las validaciones son correctas
         if self.validations_work():
-            parameters = ClienteParticular(self.name.get(), self.surname.get(), self.phone.get(), self.mail.get())
-            parameters.id_cliente = self.rc.store(parameters)
-            self.lista_clientes.append(parameters)
-            self.message['text'] = 'El cliente personal {0} {1} ha sido añadido correctamente'.format(self.name.get(), self.surname.get())
-            self.name.delete(0, END)
-            self.surname.delete(0, END)
-            self.phone.delete(0, END)
-            self.mail.delete(0, END)
-            self.get_clients()
-            return parameters
+            self.message['text'] = ''
+            obj_cliente = None
+            obj_cliente = self.rc.get_one(self.id_cliente_entry.get())
+            fe_entrada = datetime.strptime(self.entry_date.get(), '%d-%m-%Y')
+            fe_entrada.strftime('%Y-%m-%d')
+            fecha_ent_pro = datetime.strptime(self.proposal_delivery_date.get(), '%d-%m-%Y')
+            fecha_ent_pro.strftime('%Y-%m-%d')
+            parameters = Trabajo(obj_cliente, fe_entrada, fecha_ent_pro, None, self.description.get(), False, None)
+            print (obj_cliente)
+            print (parameters)
+            a = self.rt.store(parameters)
+            print (a)
+            if a:
+                self.message['text'] = 'El trabajo del cliente {0} ha sido añadido correctamente'.format(self.id_cliente_entry)
+            else:
+                self.message['text'] = 'El trabajo del cliente no se ha sido añadido. Código de error: 0'
+            self.get_works()
+            #self.id_cliente_entry.delete(0, END)
+            #self.entry_date.delete(0, END)
+            #self.proposal_delivery_date.delete(0, END)
+            #self.real_delivery_date.delete(0, END)
+            #self.description.delete(0, END)
+            #self.withdrawn.delete(0, END)
+            #return parameters
         else:
-            self.message['text'] = 'Nombre, Apellido, Teléfono y Mail son requeridos'
+            self.message['text'] = 'Todos los campos son requeridos'
+
+    def trabajo_finalizado(self):
+       '''Finaliza un trabajo, cambiando su fecha entrega real a hoy'''
+       try:
+           self.tree3.item(self.tree3.selection())['text']
+       except IndexError:
+           self.message['text'] = 'Seleccione un trabajo'
+       #parameters = ClienteCorporativo(company_name,contact_name,contact_phone,phone,mail,id_cliente1)
+       #self.rc.delete(parameters)
+       #self.message['text'] = 'El cliente {0} de la empresa {1} sido eliminado correctamente'.format(contact_name, company_name)
+       #self.get_clients()
+
+    def retirado(self):
+       '''Se cambia su estado de retirado a True'''
+       try:
+           self.tree3.item(self.tree3.selection())['text']
+       except IndexError:
+           self.message['text'] = 'Seleccione un trabajo'
+       
+       self.message['text'] = 'El trabajo ha sido entregado correctamente'
+       self.get_works()
+
+    def edit_trabajos_window(self):
+        '''Ventana para editar un trabajo'''
+        self.message['text'] = ''
+        try:
+            self.tree3.item(self.tree3.selection())['values'][0]
+        except IndexError:
+            self.message['text'] = 'Por favor, seleccione un registro'
+            return
+        old_description = self.tree3.item(self.tree3.selection())['values'][4]
+        old_entry_date = self.tree3.item(self.tree3.selection())['values'][1]
+        id_cliente = self.tree3.item(self.tree3.selection())['values'][0]
+        proposal_delivery_date = self.tree3.item(self.tree3.selection())['values'][2]
+        real_delivery_date = self.tree3.item(self.tree3.selection())['values'][3]
+        withdrawn = self.tree3.item(self.tree3.selection())['values'][5]
+        id_trabajo = self.tree3.item(self.tree3.selection())['text']
+        self.edit_work_window = Toplevel()
+        self.edit_work_window.title = 'Editar trabajo'
+
+        # ID
+        Label(self.edit_work_window, text = 'ID: ').grid(row = 1, column = 1)
+        Entry(self.edit_work_window, textvariable = StringVar(self.edit_work_window, value = id_trabajo), state = 'readonly').grid(row = 1, column = 2)
+
+        # Descripcion Anterior
+        Label(self.edit_work_window, text = 'Descripcion anterior: ').grid(row = 2, column = 1)
+        Entry(self.edit_work_window, textvariable = StringVar(self.edit_work_window, value = old_description), state = 'readonly').grid(row = 2, column = 2)
+
+        # Descripcion Actual
+        Label(self.edit_work_window, text = 'Descripcion actual: ').grid(row = 3, column = 1)
+        new_description = Entry(self.edit_work_window)
+        new_description.grid(row = 3, column = 2)
+
+        # Fecha de Ingreso Anterior
+        Label(self.edit_work_window, text = 'Fecha de ingreso anterior: ').grid(row = 4, column = 1)
+        Entry(self.edit_work_window, textvariable = StringVar(self.edit_work_window, value = old_entry_date), state = 'readonly').grid(row = 4, column = 2)
+
+        # Fecha de Ingreso Actual
+        Label(self.edit_work_window, text = 'Fecha de ingreso actual: ').grid(row = 5, column = 1)
+        new_entry_date = Entry(self.edit_work_window)
+        new_entry_date.grid(row = 5, column = 2)
+
+        # Botón de guardar cambios
+        ttk.Button(self.edit_work_window, text = 'Actualizar', command = lambda: self.edit_works_desc(id_cliente,new_entry_date.get(), proposal_delivery_date, real_delivery_date,new_description.get(),withdrawn,id_trabajo)).grid(row = 6, columnspan = 3, sticky = W + E)
+
+    def edit_works_desc(self, id_cliente, new_entry_date, proposal_delivery_date, real_delivery_date, new_description,withdrawn, id_trabajo):
+        '''Editar descripcion y fecha de ingreso'''
+        nueva_fecha = datetime.strptime(new_entry_date, '%d-%m-%Y')
+        nueva_fecha.strftime('%Y-%m-%d')
+        fecha_ent_pro = datetime.strptime(proposal_delivery_date, '%Y-%m-%d')
+        fecha_ent_pro.strftime('%Y-%m-%d')
+        fecha_ent_re = datetime.strptime(real_delivery_date, '%Y-%m-%d')
+        fecha_ent_re.strftime('%Y-%m-%d')
+        print(nueva_fecha)
+        parameters = Trabajo(id_cliente,nueva_fecha,fecha_ent_pro,fecha_ent_re,new_description,withdrawn, id_trabajo)
+        print (parameters)
+        a = self.rt.update(parameters)
+        if a:
+            self.edit_work_window.destroy()
+            self.message['text'] = 'El trabajo sido editado correctamente'
+        else:
+            self.message['text'] = 'El trabajo no ha sido editado'
+        self.get_works()
 
 if __name__ == '__main__':
     window = Tk()
