@@ -469,8 +469,15 @@ class Product:
             obj_cliente = self.rc.get_one(self.id_cliente_entry.get())
             fe_entrada = datetime.strptime(self.entry_date.get(), '%d-%m-%Y')
             fe_entrada.strftime('%Y-%m-%d')
-            fecha_ent_pro = datetime.strptime(self.proposal_delivery_date.get(), '%d-%m-%Y')
-            fecha_ent_pro.strftime('%Y-%m-%d')
+            fecha_ent_pro = ''
+            
+            # En caso de que la fecha propuesta esté en blanco, asignar None
+            if fecha_ent_pro != '':
+                fecha_ent_pro = datetime.strptime(self.proposal_delivery_date.get(), '%d-%m-%Y')
+                fecha_ent_pro.strftime('%Y-%m-%d')
+            else:
+                fe_ent_pro = None
+
             parameters = Trabajo(obj_cliente, fe_entrada, fecha_ent_pro, None, self.description.get(), False, None)
             a = self.rt.store(parameters)
             if a:
