@@ -476,19 +476,22 @@ class Product:
                 fecha_ent_pro = datetime.strptime(self.proposal_delivery_date.get(), '%d-%m-%Y')
                 fecha_ent_pro.strftime('%Y-%m-%d')
             else:
-                fe_ent_pro = None
+                fecha_ent_pro = None
 
             parameters = Trabajo(obj_cliente, fe_entrada, fecha_ent_pro, None, self.description.get(), False, None)
             a = self.rt.store(parameters)
+            print(parameters,a)
             if a:
                 self.message['text'] = 'El trabajo del cliente {0} ha sido añadido correctamente'.format(self.id_cliente_entry.get())
+                self.get_works()
+                self.id_cliente_entry.delete(0, END)
+                self.entry_date.delete(0, END)
+                self.proposal_delivery_date.delete(0, END)
+                self.description.delete(0, END)
             else:
                 self.message['text'] = 'El trabajo del cliente no se ha sido añadido. Código de error: 0'
-            self.get_works()
-            self.id_cliente_entry.delete(0, END)
-            self.entry_date.delete(0, END)
-            self.proposal_delivery_date.delete(0, END)
-            self.description.delete(0, END)
+                print (fecha_ent_pro)
+        
         else:
             self.message['text'] = 'Todos los campos son requeridos'
 
