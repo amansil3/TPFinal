@@ -462,7 +462,7 @@ class Product:
         return  len(self.id_cliente_entry.get())
 
     def add_work(self):
-        #si las validaciones son correctas
+        #si las validaciones son correctass
         if self.validations_work():
             self.message['text'] = ''
             obj_cliente = None
