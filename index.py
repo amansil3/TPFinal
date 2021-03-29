@@ -518,6 +518,12 @@ class Product:
         id_cliente = self.tree3.item(self.tree3.selection())['values'][0]
         proposal_delivery_date = self.tree3.item(self.tree3.selection())['values'][2]
         real_delivery_date = self.tree3.item(self.tree3.selection())['values'][3]
+
+        if real_delivery_date == None:
+            real_delivery_date = '01-01-1981'
+        else:
+            real_delivery_date = real_delivery_date
+
         withdrawn = self.tree3.item(self.tree3.selection())['values'][5]
         id_trabajo = self.tree3.item(self.tree3.selection())['text']
         self.edit_work_window = Toplevel()
@@ -536,28 +542,44 @@ class Product:
         new_description = Entry(self.edit_work_window)
         new_description.grid(row = 3, column = 2)
 
+        # Fecha propuesta anterior
+        Label(self.edit_work_window, text = 'Fecha propuesta anterior: ').grid(row = 4, column = 1)
+        Entry(self.edit_work_window, textvariable = StringVar(self.edit_work_window, value = proposal_delivery_date), state = 'readonly').grid(row = 4, column = 2)
+
+        # Fecha propuesta actual
+        Label(self.edit_work_window, text = 'Fecha propuesta actual: ').grid(row = 5, column = 1)
+        new_proposal_date = Entry(self.edit_work_window)
+        new_proposal_date.grid(row = 5, column = 2)
+
         # Fecha de Ingreso Anterior
-        Label(self.edit_work_window, text = 'Fecha de ingreso anterior: ').grid(row = 4, column = 1)
-        Entry(self.edit_work_window, textvariable = StringVar(self.edit_work_window, value = old_entry_date), state = 'readonly').grid(row = 4, column = 2)
+        Label(self.edit_work_window, text = 'Fecha de ingreso anterior: ').grid(row = 6, column = 1)
+        Entry(self.edit_work_window, textvariable = StringVar(self.edit_work_window, value = old_entry_date), state = 'readonly').grid(row = 6, column = 2)
 
         # Fecha de Ingreso Actual
-        Label(self.edit_work_window, text = 'Fecha de ingreso actual: ').grid(row = 5, column = 1)
+        Label(self.edit_work_window, text = 'Fecha de ingreso actual: ').grid(row = 7, column = 1)
         new_entry_date = Entry(self.edit_work_window)
-        new_entry_date.grid(row = 5, column = 2)
+        new_entry_date.grid(row = 7, column = 2)
 
         # Botón de guardar cambios
-        ttk.Button(self.edit_work_window, text = 'Actualizar', command = lambda: self.edit_works_desc(id_cliente,new_entry_date.get(), proposal_delivery_date, real_delivery_date,new_description.get(),withdrawn,id_trabajo)).grid(row = 6, columnspan = 3, sticky = W + E)
+        ttk.Button(self.edit_work_window, text = 'Actualizar', command = lambda: self.edit_works_desc(id_cliente,new_entry_date.get(), new_proposal_date.get(), real_delivery_date,new_description.get(),withdrawn,id_trabajo)).grid(row = 8, columnspan = 3, sticky = W + E)
 
-    def edit_works_desc(self, id_cliente, new_entry_date, proposal_delivery_date, real_delivery_date, new_description,withdrawn, id_trabajo):
+    def edit_works_desc(self, id_cliente, new_entry_date, new_proposal_date, real_delivery_date, new_description,withdrawn, id_trabajo):
         '''Editar descripcion y fecha de ingreso'''
         nueva_fecha = datetime.strptime(new_entry_date, '%d-%m-%Y')
         nueva_fecha.strftime('%Y-%m-%d')
-        fecha_ent_pro = datetime.strptime(proposal_delivery_date, '%Y-%m-%d')
+        fecha_ent_pro = datetime.strptime(new_proposal_date, '%d-%m-%Y')
         fecha_ent_pro.strftime('%Y-%m-%d')
-        fecha_ent_re = datetime.strptime(real_delivery_date, '%Y-%m-%d')
-        fecha_ent_re.strftime('%Y-%m-%d')
+        
+        #if real_delivery_date == None:
+        #    real_delivery_date = '01-01-1981'
+        #else:
+        #    real_delivery_date = real_delivery_date
+        
+        #fecha_ent_re = datetime.strptime(real_delivery_date, '%d-%m-%Y')
+        #fecha_ent_re.strftime('%Y-%m-%d')
+            
         print(nueva_fecha)
-        parameters = Trabajo(id_cliente,nueva_fecha,fecha_ent_pro,fecha_ent_re,new_description,withdrawn, id_trabajo)
+        parameters = Trabajo(id_cliente,nueva_fecha,fecha_ent_pro,real_delivery_date,new_description,withdrawn, id_trabajo)
         print (parameters)
         a = self.rt.update(parameters)
         if a:
