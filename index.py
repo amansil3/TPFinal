@@ -570,17 +570,16 @@ class Product:
         fecha_ent_pro = datetime.strptime(new_proposal_date, '%d-%m-%Y')
         fecha_ent_pro.strftime('%Y-%m-%d')
         
-        #if real_delivery_date == None:
-        #    real_delivery_date = '01-01-1981'
-        #else:
-        #    real_delivery_date = real_delivery_date
+        if real_delivery_date == 'None':
+            real_delivery_date = '01-01-1981'
+            fecha_ent_re = datetime.strptime(real_delivery_date, '%Y-%m-%d')
+            fecha_ent_re.strftime('%Y-%m-%d')
+        else:
+            fecha_ent_re = datetime.strptime(real_delivery_date, '%Y-%m-%d')
+            fecha_ent_re.strftime('%Y-%m-%d')
         
-        #fecha_ent_re = datetime.strptime(real_delivery_date, '%d-%m-%Y')
-        #fecha_ent_re.strftime('%Y-%m-%d')
-            
-        print(nueva_fecha)
-        parameters = Trabajo(id_cliente,nueva_fecha,fecha_ent_pro,real_delivery_date,new_description,withdrawn, id_trabajo)
-        print (parameters)
+        parameters = Trabajo(id_cliente,nueva_fecha,fecha_ent_pro,fecha_ent_re,new_description,withdrawn, id_trabajo)
+        
         a = self.rt.update(parameters)
         if a:
             self.edit_work_window.destroy()
@@ -591,6 +590,11 @@ class Product:
 
     def trabajo_finalizado(self):
         '''Cambiar el estado a finalizado, modificando su fecha de entrega real a hoy'''
+        try:
+            self.tree3.item(self.tree3.selection())['values'][0]
+        except IndexError:
+            self.message['text'] = 'Por favor, seleccione un registro'
+            return
         # Obtengo la fecha de hoy
         hoy = date.today()
         hoy.strftime('%d, %m, %Y')
@@ -607,12 +611,20 @@ class Product:
         # Formateo las fechas
         nueva_fecha = datetime.strptime(entry_date, '%Y-%m-%d')
         nueva_fecha.strftime('%Y-%m-%d')
+
+        if proposal_delivery_date == 'None':
+            proposal_delivery_date = '2000-01-01'
+        else:
+            proposal_delivery_date = proposal_delivery_date
+
         fecha_ent_pro = datetime.strptime(proposal_delivery_date, '%Y-%m-%d')
         fecha_ent_pro.strftime('%Y-%m-%d')
+        fecha_ent_pro = datetime.strptime(proposal_delivery_date, '%Y-%m-%d')
+        fecha_ent_pro.strftime('%Y-%m-%d')    
 
         # Paso parametros al obj Trabajo
         parameters = Trabajo(id_cliente,nueva_fecha,fecha_ent_pro,hoy,description,withdrawn, id_trabajo)
-        print (parameters)
+        
         a = self.rt.update(parameters)
         if a:
             self.message['text'] = 'El trabajo sido editado correctamente'
@@ -622,6 +634,11 @@ class Product:
 
     def trabajo_entregado(self):
         '''Cambiar el estado a entregado'''
+        try:
+            self.tree3.item(self.tree3.selection())['values'][0]
+        except IndexError:
+            self.message['text'] = 'Por favor, seleccione un registro'
+            return
 
         # Obtengo los datos actuales del objeto en cuestión
         description = self.tree3.item(self.tree3.selection())['values'][4]
@@ -644,7 +661,7 @@ class Product:
 
         # Paso parametros al obj Trabajo
         parameters = Trabajo(id_cliente,nueva_fecha,fecha_ent_pro,fecha_ent_real,description,withdrawn, id_trabajo)
-        print (parameters)
+        
         a = self.rt.update(parameters)
         if a:
             self.message['text'] = 'El trabajo {0} sido entregado correctamente'.format(id_trabajo)
